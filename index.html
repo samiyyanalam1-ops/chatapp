@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,115 +9,207 @@
     <style>
         :root { 
             --p: #6366f1; --bg: #0f172a; --c: #1e293b; --online: #22c55e; 
-            --link: #60a5fa; --rec: #ef4444; 
+            --link: #60a5fa; --mention: #fbbf24; --hash: #a5b4fc; --rec: #ef4444; 
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; justify-content: center; height: 100dvh; overflow: hidden; }
-        .app { width: 100%; max-width: 450px; background: var(--c); display: flex; flex-direction: column; height: 100%; position: relative; }
+        .app { width: 100%; max-width: 450px; background: var(--c); display: flex; flex-direction: column; height: 100%; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
         
         /* Header */
-        .hdr { padding: 12px 15px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; }
+        .hdr { padding: 12px 15px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; z-index: 10; }
         .hdr-info { flex: 1; text-align: center; }
         .hdr h1 { font-size: 0.9rem; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; color: var(--p); }
-        
-        /* Buttons */
-        .icon-btn { background: #334155; color: white; border: none; cursor: pointer; width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .icon-btn:hover { background: var(--p); }
-        .btn-clear:hover { background: var(--rec) !important; }
+        .online-bar { font-size: 0.65rem; color: var(--online); margin-top: 3px; display: flex; justify-content: center; align-items: center; gap: 5px; opacity: 0.8; }
+        .dot { width: 6px; height: 6px; background: var(--online); border-radius: 50%; box-shadow: 0 0 8px var(--online); }
+        .logout-btn { background: #334155; color: white; border: none; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .logout-btn:hover { background: var(--rec); }
 
         /* Chat Area */
-        #box { flex: 1; overflow-y: auto; padding: 20px 15px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
-        .msg-wrapper { display: flex; gap: 10px; max-width: 85%; animation: fadeIn 0.3s ease; }
+        #box { flex: 1; overflow-y: auto; padding: 20px 15px; display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth; }
+        .msg-wrapper { display: flex; gap: 10px; max-width: 88%; animation: fadeIn 0.3s ease; }
         .sent-wrapper { align-self: flex-end; flex-direction: row-reverse; }
+        .received-wrapper { align-self: flex-start; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .pfp { width: 35px; height: 35px; border-radius: 10px; background: #0f172a; }
-        .msg { padding: 10px 14px; border-radius: 15px; font-size: 0.95rem; line-height: 1.4; position: relative; }
-        .sent { background: var(--p); border-top-right-radius: 2px; }
-        .received { background: #334155; border-top-left-radius: 2px; }
-        .u { font-size: 0.7rem; opacity: 0.6; font-weight: bold; margin-bottom: 3px; display: block; }
-
-        /* Input */
-        .input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #1e293b; color: white; outline: none; }
-        .btn-send { background: var(--p); border: none; width: 45px; height: 45px; border-radius: 12px; color: white; cursor: pointer; }
+        .pfp { width: 38px; height: 38px; border-radius: 12px; background: #0f172a; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         
-        /* Login */
-        #log { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
-        #log input { width: 260px; padding: 15px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: white; }
+        .msg { padding: 10px 14px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .sent { background: var(--p); color: white; border-top-right-radius: 2px; }
+        .received { background: #334155; color: #e2e8f0; border-top-left-radius: 2px; }
+        
+        /* Message Header (User + Copy) */
+        .msg-hdr { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 4px; }
+        .u { font-size: 0.7rem; opacity: 0.7; font-weight: 700; text-transform: lowercase; }
+        
+        /* Copy Button - Visible */
+        .copy-btn { 
+            background: none; border: none; color: white; 
+            padding: 2px; cursor: pointer; font-size: 0.75rem;
+            opacity: 0.5; transition: 0.2s;
+        }
+        .copy-btn:hover { opacity: 1; color: var(--hash); }
+        .copy-btn:active { transform: scale(0.8); }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: white; padding: 10px 20px; border-radius: 30px;
+            font-size: 0.85rem; z-index: 1000; display: none; border: 1px solid var(--p);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        audio { height: 35px; width: 180px; margin-top: 8px; filter: invert(1); border-radius: 20px; }
+
+        /* Input Area */
+        .input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        input { flex: 1; padding: 12px 18px; border-radius: 15px; border: 1px solid #334155; background: #1e293b; color: white; outline: none; font-size: 16px; transition: 0.2s; }
+        input:focus { border-color: var(--p); }
+        .btn-round { background: var(--p); border: none; width: 45px; height: 45px; border-radius: 15px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: 0.3s; }
+        .btn-round:active { transform: scale(0.9); }
+        #voiceBtn { background: #334155; }
+        .rec-active { background: var(--rec) !important; animation: pulse 1s infinite; border-radius: 50%; }
+        
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.7); } 100% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } }
+
+        /* Login Screen */
+        #log { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; text-align: center; }
+        #log i { font-size: 4rem; color: var(--p); margin-bottom: 10px; }
+        #log input { width: 280px; border-radius: 12px; padding: 15px; border: 1px solid #334155; background: #1e293b; color: white; font-size: 1rem; }
+        .join-btn { width: 280px; padding: 15px; border-radius: 12px; background: var(--p); color: white; font-weight: bold; border: none; cursor: pointer; font-size: 1rem; }
     </style>
 </head>
 <body>
 
     <div id="log">
-        <i class="fas fa-ghost" style="font-size: 3rem; color: var(--p)"></i>
-        <h2 style="letter-spacing: 2px;">SHEETCHAT <span style="color:var(--p)">PRO</span></h2>
-        <input type="text" id="user" placeholder="Enter username...">
-        <button onclick="join()" style="width: 260px; padding: 15px; background: var(--p); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">START CHATTING</button>
+        <i class="fas fa-ghost"></i>
+        <h2 style="margin: 0; letter-spacing: 2px;">SHEETCHAT <span style="color:var(--p)">PRO</span></h2>
+        <p style="color: #64748b; font-size: 0.9rem; margin-top: -10px;">Cloud-based messaging 2026</p>
+        <input type="text" id="user" placeholder="Create a username..." autocomplete="off">
+        <button onclick="join()" class="join-btn">GET STARTED</button>
     </div>
+
+    <div id="toast">Message copied!</div>
 
     <div class="app">
         <div class="hdr">
-            <button class="icon-btn" onclick="logout()"><i class="fas fa-power-off"></i></button>
+            <button class="logout-btn" onclick="logout()" title="Logout"><i class="fas fa-power-off"></i></button>
             <div class="hdr-info">
-                <h1>Secure Cloud</h1>
-                <div style="font-size: 0.6rem; color: var(--online);"><i class="fas fa-circle" style="font-size: 5px;"></i> Connected</div>
+                <h1>Global Network</h1>
+                <div class="online-bar">
+                    <div class="dot"></div> <span id="online-count">Syncing...</span>
+                </div>
             </div>
-            <button class="icon-btn btn-clear" onclick="clearChat()" title="Clear All Data"><i class="fas fa-trash-alt"></i></button>
+            <div style="width: 32px"></div> 
         </div>
         
         <div id="box"></div>
 
         <div class="input-area">
-            <input type="text" id="m" placeholder="Message..." autocomplete="off">
-            <button onclick="sendMsg()" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+            <button id="voiceBtn" class="btn-round" title="Voice Message"><i class="fas fa-microphone"></i></button>
+            <input type="text" id="m" placeholder="Write something..." autocomplete="off">
+            <button id="sendBtn" class="btn-round"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
     <script>
-        // YOUR NEW DEPLOYMENT URL
-        const URL = "https://script.google.com/macros/s/AKfycbw1JxWUXq9ivL4MPsFMMMQVLR381l5B3iYDNvHa9bLPx6lHek6aIjy_AmBuQd2r_oOE/exec";
+        const URL = "https://script.google.com/macros/s/AKfycbyk581pQkS9o07W9527e8PCcW43Y5-MWncB31iMF_Dd-b5EjXZksqzr4MYD3V123-Mo/exec";
         
         let myName = localStorage.getItem('sheetChatName') || "";
         let lastCount = 0;
+        let mediaRecorder;
+        let audioChunks = [];
 
-        window.onload = () => { if(myName) { document.getElementById('log').style.display = 'none'; init(); } };
+        window.onload = () => {
+            if(myName) {
+                document.getElementById('log').style.display = 'none';
+                init();
+            }
+        };
 
         function join() {
             const val = document.getElementById('user').value.trim();
-            if(val) { myName = val; localStorage.setItem('sheetChatName', myName); document.getElementById('log').style.display = 'none'; init(); }
+            if(val) {
+                myName = val;
+                localStorage.setItem('sheetChatName', myName);
+                document.getElementById('log').style.display = 'none';
+                init();
+            }
         }
 
-        function logout() { localStorage.removeItem('sheetChatName'); location.reload(); }
+        function logout() {
+            localStorage.removeItem('sheetChatName');
+            location.reload();
+        }
 
-        function init() { load(); setInterval(load, 3000); }
+        function init() {
+            load();
+            setInterval(load, 3000);
+            setInterval(heartbeat, 10000);
+            heartbeat();
+        }
 
-        async function sendMsg() {
-            const i = document.getElementById('m');
-            const txt = i.value.trim();
-            if(!txt) return;
-            
-            appendUI(myName, txt, 'sent');
-            i.value = "";
+        async function copyMsg(btn, text) {
+            try {
+                // If it's a voice clip, we don't copy the base64 string
+                if(text.includes("VC:data:audio")) return;
 
+                await navigator.clipboard.writeText(text);
+                
+                const toast = document.getElementById('toast');
+                toast.style.display = 'block';
+                setTimeout(() => toast.style.display = 'none', 2000);
+                
+                const icon = btn.querySelector('i');
+                icon.className = 'fas fa-check';
+                icon.style.color = '#22c55e';
+                setTimeout(() => {
+                    icon.className = 'fas fa-copy';
+                    icon.style.color = 'white';
+                }, 2000);
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+        }
+
+        const vBtn = document.getElementById('voiceBtn');
+        vBtn.onclick = async () => {
+            if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onloadend = () => postData(`VC:${reader.result}`);
+                    };
+                    mediaRecorder.start();
+                    vBtn.classList.add('rec-active');
+                    vBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                } catch(e) { alert("Enable Microphone to record."); }
+            } else {
+                mediaRecorder.stop();
+                vBtn.classList.remove('rec-active');
+                vBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            }
+        };
+
+        async function postData(content) {
+            if(!content.trim()) return;
+            appendUI(myName, content, 'sent');
             const fd = new FormData();
             fd.append('name', myName);
             fd.append('email', 'ChatUser');
-            fd.append('Massage', txt);
-            
-            try { await fetch(URL, { method: 'POST', body: fd }); } catch(e) {}
+            fd.append('Massage', content);
+            try { await fetch(URL, { method: 'POST', body: fd }); } catch(e) { console.error("Post Error", e); }
         }
 
-        async function clearChat() {
-            if(!confirm("Wipe all messages from the spreadsheet?")) return;
-            const fd = new FormData();
-            fd.append('mode', 'clear');
-            try {
-                await fetch(URL, { method: 'POST', body: fd });
-                document.getElementById('box').innerHTML = "";
-                lastCount = 0;
-            } catch(e) { alert("Clear failed."); }
-        }
+        document.getElementById('sendBtn').onclick = () => {
+            const i = document.getElementById('m');
+            if(i.value) { postData(i.value); i.value = ""; }
+        };
 
         async function load() {
             try {
@@ -131,23 +224,56 @@
                     lastCount = chats.length;
                     box.scrollTop = box.scrollHeight;
                 }
-            } catch (e) {}
+
+                const online = [...new Set(data.filter(r => r[1] === 'StatusUpdate').map(r => r[0]))];
+                document.getElementById('online-count').innerText = `${online.length} Active`;
+            } catch (e) { document.getElementById('online-count').innerText = "Connecting..."; }
         }
 
         function appendUI(u, t, type) {
             const box = document.getElementById('box');
             const wrap = document.createElement('div');
             wrap.className = `msg-wrapper ${type}-wrapper`;
+            
             const pfp = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(u)}`;
             
+            let body = "";
+            let isVoice = t.startsWith("VC:data:audio");
+
+            if (isVoice) {
+                body = `<audio controls src="${t.split('VC:')[1]}"></audio>`;
+            } else {
+                body = format(t);
+            }
+            
+            // Prepare text for copy function (escaping quotes)
+            const copyContent = isVoice ? "[Voice Message]" : t.replace(/'/g, "\\'");
+
             wrap.innerHTML = `
                 <img src="${pfp}" class="pfp">
                 <div class="msg ${type}">
-                    <span class="u">${u}</span>
-                    <div class="msg-content">${t}</div>
-                </div>`;
+                    <div class="msg-hdr">
+                        <span class="u">${u}</span>
+                        ${ !isVoice ? `<button class="copy-btn" onclick="copyMsg(this, '${copyContent}')" title="Copy"><i class="fas fa-copy"></i></button>` : '' }
+                    </div>
+                    <div class="msg-content">${body}</div>
+                </div>
+            `;
             box.appendChild(wrap);
             box.scrollTop = box.scrollHeight;
+        }
+
+        function format(t) {
+            return t.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--link)">$1</a>')
+                    .replace(/(@[a-zA-Z0-9_]+)/g, '<span style="color:var(--mention)">$1</span>')
+                    .replace(/(#[a-zA-Z0-9_]+)/g, '<span style="color:var(--hash)">$1</span>');
+        }
+
+        async function heartbeat() {
+            if(!myName) return;
+            const fd = new FormData();
+            fd.append('name', myName); fd.append('email', 'StatusUpdate'); fd.append('Massage', 'ping');
+            fetch(URL, { method: 'POST', body: fd }).catch(()=>{});
         }
     </script>
 </body>
