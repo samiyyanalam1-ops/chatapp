@@ -3,158 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SheetChat Fixed | 2026</title>
+    <title>SheetChat Pro | 2026</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { 
             --p: #6366f1; 
             --bg: #0f172a; 
             --c: #1e293b; 
+            --online: #22c55e; 
+            --link: #60a5fa; 
+            --mention: #fbbf24; 
+            --hash: #a5b4fc; /* Specific color for Hashtags */
         }
 
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: var(--bg); 
-            color: white; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            /* Fix: Use dvh for dynamic mobile height */
-            height: 100dvh; 
-            overflow: hidden; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg); color: white; margin: 0; 
+            display: flex; justify-content: center; height: 100dvh; overflow: hidden; 
         }
 
-        .app { 
-            width: 100%; 
-            max-width: 450px; 
-            background: var(--c); 
-            display: flex; 
-            flex-direction: column; 
-            height: 100%;
-        }
-
-        .hdr { 
-            padding: 15px; 
-            background: rgba(0,0,0,0.3); 
-            border-bottom: 2px solid var(--p); 
-            text-align: center; 
-            font-weight: bold;
-            flex-shrink: 0; /* Prevents header from collapsing */
-        }
-
-        #box { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .msg { 
-            padding: 10px 14px; 
-            border-radius: 18px; 
-            max-width: 85%; 
-            font-size: 0.95rem; 
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .sent { 
-            align-self: flex-end; 
-            background: var(--p); 
-            border-bottom-right-radius: 4px; 
-        }
-
-        .received { 
-            align-self: flex-start; 
-            background: #334155; 
-            border-bottom-left-radius: 4px; 
-        }
-
-        .u { 
-            font-size: 0.75rem; 
-            opacity: 0.7; 
-            display: block; 
-            margin-bottom: 4px; 
-            font-weight: 600; 
-        }
-
-        .input-area { 
-            padding: 12px; 
-            background: #0f172a; 
-            display: flex; 
-            gap: 8px; 
-            flex-shrink: 0; /* CRITICAL: Keeps input visible on mobile */
-            padding-bottom: env(safe-area-inset-bottom, 12px);
-        }
-
-        input { 
-            flex: 1; 
-            padding: 12px 15px; 
-            border-radius: 25px; 
-            border: 1px solid #334155; 
-            background: #1e293b; 
-            color: white; 
-            outline: none; 
-            font-size: 16px; /* Prevents iOS auto-zoom */
-        }
-
-        button { 
-            background: var(--p); 
-            border: none; 
-            width: 45px;
-            height: 45px;
-            border-radius: 50%; 
-            color: white; 
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s;
-        }
-
-        button:active { transform: scale(0.9); }
-
-        #log { 
-            position: fixed; 
-            inset: 0; 
-            background: var(--bg); 
-            z-index: 999; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 15px;
-        }
+        .app { width: 100%; max-width: 450px; background: var(--c); display: flex; flex-direction: column; height: 100%; }
         
-        #log input { flex: none; width: 260px; border-radius: 10px; }
-        #log button { width: 260px; border-radius: 10px; }
+        .hdr { padding: 12px; background: rgba(0,0,0,0.3); border-bottom: 2px solid var(--p); text-align: center; flex-shrink: 0; }
+        .hdr h1 { font-size: 1.1rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+
+        .online-bar { font-size: 0.75rem; color: var(--online); margin-top: 5px; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .dot { width: 8px; height: 8px; background: var(--online); border-radius: 50%; box-shadow: 0 0 8px var(--online); }
+
+        #box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
+        
+        .msg { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+        .sent { align-self: flex-end; background: var(--p); border-bottom-right-radius: 4px; }
+        .received { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; }
+        .u { font-size: 0.75rem; opacity: 0.8; display: block; margin-bottom: 4px; font-weight: bold; }
+
+        /* Rich Text Styles */
+        .mention { color: var(--mention); font-weight: bold; background: rgba(251, 191, 36, 0.1); padding: 0 2px; border-radius: 3px; }
+        .hashtag { color: var(--hash); font-weight: bold; }
+        .chat-link { color: var(--link); text-decoration: underline; }
+
+        .input-area { padding: 12px; background: #0f172a; display: flex; gap: 8px; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 12px); }
+        input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #334155; background: #1e293b; color: white; outline: none; font-size: 16px; }
+        button { background: var(--p); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        #log { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+        #log input, #log button { width: 260px; height: 48px; border-radius: 12px; border: none; font-size: 1rem; }
     </style>
 </head>
 <body>
 
     <div id="log">
-        <i class="fas fa-comments" style="font-size: 3rem; color: var(--p)"></i>
-        <h2 style="margin: 0;">SheetChat</h2>
-        <input type="text" id="user" placeholder="Enter Your Name..." autocomplete="off">
-        <button onclick="join()">Join Chat</button>
+        <i class="fas fa-hashtag" style="font-size: 3rem; color: var(--p)"></i>
+        <h2>SheetChat Pro</h2>
+        <input type="text" id="user" placeholder="Enter name..." autocomplete="off">
+        <button onclick="join()" style="background: var(--p); color: white; font-weight: bold;">JOIN NOW</button>
     </div>
 
     <div class="app">
-        <div class="hdr">GLOBAL MESSENGER</div>
+        <div class="hdr">
+            <h1>Global Chat</h1>
+            <div class="online-bar">
+                <div class="dot"></div> <span id="online-count">Syncing...</span>
+            </div>
+        </div>
         <div id="box"></div>
         <form id="f" class="input-area">
-            <input type="text" id="m" placeholder="Type message..." autocomplete="off" required>
+            <input type="text" id="m" placeholder="Type @name or #topic..." autocomplete="off" required>
             <button type="submit"><i class="fas fa-paper-plane"></i></button>
         </form>
     </div>
 
     <script>
         const URL = "https://script.google.com/macros/s/AKfycbyk581pQkS9o07W9527e8PCcW43Y5-MWncB31iMF_Dd-b5EjXZksqzr4MYD3V123-Mo/exec";
-        
         let myName = "";
         let lastCount = 0;
 
@@ -164,16 +84,48 @@
                 myName = n;
                 document.getElementById('log').style.display = 'none';
                 load();
-                setInterval(load, 3500); // Polling every 3.5s
+                setInterval(load, 3000); 
+                setInterval(sendHeartbeat, 10000);
+                sendHeartbeat();
             }
+        }
+
+        async function sendHeartbeat() {
+            const fd = new FormData();
+            fd.append('name', myName);
+            fd.append('email', 'StatusUpdate'); 
+            fd.append('Massage', 'ping');
+            try { await fetch(URL, { method: 'POST', body: fd }); } catch(e){}
+        }
+
+        // --- IMPROVED RICH TEXT ENGINE ---
+        function formatText(text) {
+            if (!text) return "";
+            
+            // 1. URLs first (but we wrap them to protect them from further regex)
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            text = text.replace(urlRegex, (url) => `[[LINK:${url}]]`);
+
+            // 2. Mentions
+            const mentionRegex = /(@[a-zA-Z0-9_]+|@everyone)/g;
+            text = text.replace(mentionRegex, (m) => `<span class="mention">${m}</span>`);
+
+            // 3. Hashtags (Improved regex to ensure it doesn't break)
+            const hashRegex = /(#[a-zA-Z0-9_\u0080-\uFFFF]+)/g;
+            text = text.replace(hashRegex, (h) => `<span class="hashtag">${h}</span>`);
+
+            // 4. Unwrap Links
+            text = text.replace(/\[\[LINK:(.*?)\]\]/g, (match, url) => {
+                return `<a href="${url}" target="_blank" class="chat-link">${url}</a>`;
+            });
+
+            return text;
         }
 
         document.getElementById('f').onsubmit = async (e) => {
             e.preventDefault();
             const input = document.getElementById('m');
             const msg = input.value;
-            if(!msg) return;
-            
             input.value = "";
             appendUI(myName, msg, 'sent');
 
@@ -181,12 +133,7 @@
             fd.append('name', myName);
             fd.append('email', 'ChatUser'); 
             fd.append('Massage', msg);
-
-            try {
-                await fetch(URL, { method: 'POST', body: fd });
-            } catch (e) {
-                console.error("Error sending message");
-            }
+            await fetch(URL, { method: 'POST', body: fd });
         };
 
         async function load() {
@@ -194,26 +141,25 @@
                 const res = await fetch(URL);
                 const data = await res.json();
                 const chatData = data.filter(r => r[1] === 'ChatUser');
-
+                
                 if (chatData.length !== lastCount) {
                     const box = document.getElementById('box');
                     box.innerHTML = "";
-                    chatData.forEach(r => {
-                        appendUI(r[0], r[2], r[0] === myName ? 'sent' : 'received');
-                    });
+                    chatData.forEach(r => appendUI(r[0], r[2], r[0] === myName ? 'sent' : 'received'));
                     lastCount = chatData.length;
                     box.scrollTop = box.scrollHeight;
                 }
-            } catch (e) { 
-                console.log("Reconnecting..."); 
-            }
+
+                const onlineUsers = [...new Set(data.filter(r => r[1] === 'StatusUpdate').map(r => r[0]))];
+                document.getElementById('online-count').innerText = `${onlineUsers.length} Online: ${onlineUsers.join(', ')}`;
+            } catch (e) { }
         }
 
         function appendUI(u, t, type) {
             const box = document.getElementById('box');
             const d = document.createElement('div');
             d.className = `msg ${type}`;
-            d.innerHTML = `<span class="u">${u}</span>${t}`;
+            d.innerHTML = `<span class="u">${u}</span>${formatText(t)}`;
             box.appendChild(d);
             box.scrollTop = box.scrollHeight;
         }
