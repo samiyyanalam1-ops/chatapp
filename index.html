@@ -2,44 +2,157 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SheetChat Fixed | 2026</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --p: #6366f1; --bg: #0f172a; --c: #1e293b; }
-        body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        .app { width: 100%; max-width: 450px; background: var(--c); display: flex; flex-direction: column; }
-        .hdr { padding: 15px; background: rgba(0,0,0,0.2); border-bottom: 2px solid var(--p); text-align: center; font-weight: bold; }
-        #box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; }
-        .sent { align-self: flex-end; background: var(--p); border-bottom-right-radius: 2px; }
-        .received { align-self: flex-start; background: #334155; border-bottom-left-radius: 2px; }
-        .u { font-size: 0.7rem; opacity: 0.6; display: block; margin-bottom: 3px; font-weight: bold; }
-        .input { padding: 15px; background: #0f172a; display: flex; gap: 8px; }
-        input { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #1e293b; color: white; outline: none; }
-        button { background: var(--p); border: none; padding: 0 18px; border-radius: 10px; color: white; cursor: pointer; }
-        #log { position: fixed; inset: 0; background: var(--bg); z-index: 99; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        :root { 
+            --p: #6366f1; 
+            --bg: #0f172a; 
+            --c: #1e293b; 
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            color: white; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            /* Fix: Use dvh for dynamic mobile height */
+            height: 100dvh; 
+            overflow: hidden; 
+        }
+
+        .app { 
+            width: 100%; 
+            max-width: 450px; 
+            background: var(--c); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%;
+        }
+
+        .hdr { 
+            padding: 15px; 
+            background: rgba(0,0,0,0.3); 
+            border-bottom: 2px solid var(--p); 
+            text-align: center; 
+            font-weight: bold;
+            flex-shrink: 0; /* Prevents header from collapsing */
+        }
+
+        #box { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .msg { 
+            padding: 10px 14px; 
+            border-radius: 18px; 
+            max-width: 85%; 
+            font-size: 0.95rem; 
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .sent { 
+            align-self: flex-end; 
+            background: var(--p); 
+            border-bottom-right-radius: 4px; 
+        }
+
+        .received { 
+            align-self: flex-start; 
+            background: #334155; 
+            border-bottom-left-radius: 4px; 
+        }
+
+        .u { 
+            font-size: 0.75rem; 
+            opacity: 0.7; 
+            display: block; 
+            margin-bottom: 4px; 
+            font-weight: 600; 
+        }
+
+        .input-area { 
+            padding: 12px; 
+            background: #0f172a; 
+            display: flex; 
+            gap: 8px; 
+            flex-shrink: 0; /* CRITICAL: Keeps input visible on mobile */
+            padding-bottom: env(safe-area-inset-bottom, 12px);
+        }
+
+        input { 
+            flex: 1; 
+            padding: 12px 15px; 
+            border-radius: 25px; 
+            border: 1px solid #334155; 
+            background: #1e293b; 
+            color: white; 
+            outline: none; 
+            font-size: 16px; /* Prevents iOS auto-zoom */
+        }
+
+        button { 
+            background: var(--p); 
+            border: none; 
+            width: 45px;
+            height: 45px;
+            border-radius: 50%; 
+            color: white; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.9); }
+
+        #log { 
+            position: fixed; 
+            inset: 0; 
+            background: var(--bg); 
+            z-index: 999; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 15px;
+        }
+        
+        #log input { flex: none; width: 260px; border-radius: 10px; }
+        #log button { width: 260px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div id="log">
-        <h2 style="color: var(--p)">Live Chat</h2>
-        <input type="text" id="user" placeholder="Enter Your Name..." style="width: 250px; margin-bottom: 10px;">
-        <button onclick="join()" style="height: 45px; width: 250px;">Join Chat</button>
+        <i class="fas fa-comments" style="font-size: 3rem; color: var(--p)"></i>
+        <h2 style="margin: 0;">SheetChat</h2>
+        <input type="text" id="user" placeholder="Enter Your Name..." autocomplete="off">
+        <button onclick="join()">Join Chat</button>
     </div>
 
     <div class="app">
         <div class="hdr">GLOBAL MESSENGER</div>
         <div id="box"></div>
-        <form id="f" class="input">
+        <form id="f" class="input-area">
             <input type="text" id="m" placeholder="Type message..." autocomplete="off" required>
             <button type="submit"><i class="fas fa-paper-plane"></i></button>
         </form>
     </div>
 
     <script>
-        // APNAR NOTUN DEPLOYED URL
         const URL = "https://script.google.com/macros/s/AKfycbyk581pQkS9o07W9527e8PCcW43Y5-MWncB31iMF_Dd-b5EjXZksqzr4MYD3V123-Mo/exec";
         
         let myName = "";
@@ -51,7 +164,7 @@
                 myName = n;
                 document.getElementById('log').style.display = 'none';
                 load();
-                setInterval(load, 4000); 
+                setInterval(load, 3500); // Polling every 3.5s
             }
         }
 
@@ -59,37 +172,41 @@
             e.preventDefault();
             const input = document.getElementById('m');
             const msg = input.value;
+            if(!msg) return;
+            
             input.value = "";
-
             appendUI(myName, msg, 'sent');
 
             const fd = new FormData();
             fd.append('name', myName);
-            fd.append('email', 'ChatUser'); // Identifying Marker
-            fd.append('Massage', msg);    // Matching Apps Script param
+            fd.append('email', 'ChatUser'); 
+            fd.append('Massage', msg);
 
-            await fetch(URL, { method: 'POST', body: fd });
+            try {
+                await fetch(URL, { method: 'POST', body: fd });
+            } catch (e) {
+                console.error("Error sending message");
+            }
         };
 
         async function load() {
             try {
                 const res = await fetch(URL);
                 const data = await res.json();
-                
-                // Column B index 1 e "ChatUser" marker check korchi
                 const chatData = data.filter(r => r[1] === 'ChatUser');
 
                 if (chatData.length !== lastCount) {
                     const box = document.getElementById('box');
                     box.innerHTML = "";
                     chatData.forEach(r => {
-                        // Position-wise data: r[0]=Name, r[2]=Messege/Massage
                         appendUI(r[0], r[2], r[0] === myName ? 'sent' : 'received');
                     });
                     lastCount = chatData.length;
                     box.scrollTop = box.scrollHeight;
                 }
-            } catch (e) { console.log("Syncing..."); }
+            } catch (e) { 
+                console.log("Reconnecting..."); 
+            }
         }
 
         function appendUI(u, t, type) {
